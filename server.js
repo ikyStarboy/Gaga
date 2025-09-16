@@ -1,9 +1,8 @@
-const express = require("express");
-const multer = require("multer");
-const axios = require("axios");
-const FormData = require("form-data");
-const fileType = require("file-type"); // Ubah baris ini
-const fs = require("fs");
+import express from "express";
+import multer from "multer";
+import axios from "axios";
+import FormData from "form-data";
+import { fileTypeFromBuffer } from "file-type";
 
 const app = express();
 
