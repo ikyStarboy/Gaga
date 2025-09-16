@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WPW - Web Penghitaman Waifu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dark-bg: #1a1a2e;
+            --card-bg: #2b2b40;
+            --pink-accent: #ff4081;
+            --purple-accent: #9c27b0;
+            --text-light: #f0f0f0;
+            --text-dark: #b0b0c2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            position: relative;
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+        .logo span {
+            color: var(--pink-accent);
+        }
+        .menu-icon {
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 1001; /* Pastikan di atas sidebar */
+        }
+        .menu-icon span {
+            display: block;
+            width: 30px;
+            height: 3px;
+            background: var(--text-light);
+            margin: 6px 0;
+            transition: 0.4s;
+        }
+        .menu-icon.open span:nth-child(1) {
+            transform: rotate(-45deg) translate(-6px, 6px);
+        }
+        .menu-icon.open span:nth-child(2) {
+            opacity: 0;
+        }
+        .menu-icon.open span:nth-child(3) {
+            transform: rotate(45deg) translate(-6px, -6px);
+        }
+
+        /* --- STYLING SIDEBAR --- */
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            right: 0;
+            background-color: rgba(43, 43, 64, 0.95);
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-links {
+            list-style: none;
+            padding: 0;
+            margin-top: 30px;
+            text-align: center;
+        }
+        .sidebar-links li {
+            margin: 20px 0;
+        }
+        .sidebar-links a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 1.2rem;
+            color: var(--text-light);
+            display: block;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        .sidebar-links a:hover {
+            background-color: var(--pink-accent);
+        }
+        /* --- AKHIR STYLING SIDEBAR --- */
+
+        .hero {
+            text-align: center;
+            padding: 40px 0;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--pink-accent);
+            margin-bottom: 10px;
+        }
+        .hero p {
+            color: var(--text-dark);
+            font-style: italic;
+        }
+
+        .card {
+            background: linear-gradient(135deg, var(--card-bg), #3c3c52);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .card h2, .card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--pink-accent);
+            margin-bottom: 15px;
+        }
+
+        .tutorial-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .tutorial-item .icon {
+            font-size: 2rem;
+            color: var(--purple-accent);
+            margin-right: 15px;
+        }
+        .tutorial-item .step-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+        .tutorial-item p {
+            color: var(--text-dark);
+        }
+
+        .dropzone {
+            border: 2px dashed var(--purple-accent);
+            border-radius: 15px;
+            text-align: center;
+            padding: 40px 20px;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+        .dropzone .upload-icon {
+            font-size: 3rem;
+            color: var(--purple-accent);
+        }
+        .dropzone p {
+            color: var(--text-dark);
+        }
+
+        /* --- STYLING UNTUK SLIDER FOTO PERBANDINGAN --- */
+        .image-compare-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        .image-compare-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+        }
+        .image-compare-container .image-original {
+            clip-path: inset(0 50% 0 0);
+        }
+        .image-compare-container .slider-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            z-index: 5;
+            pointer-events: none;
+        }
+        .image-compare-container .slider-handle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid var(--purple-accent);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            cursor: grab;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .image-compare-container .slider-handle:active {
+            cursor: grabbing;
+        }
+        .image-compare-container .slider-handle::before,
+        .image-compare-container .slider-handle::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 15px;
+            height: 3px;
+            background: var(--purple-accent);
+            transform: translateY(-50%);
+        }
+        .image-compare-container .slider-handle::before {
+            left: 5px;
+        }
+        .image-compare-container .slider-handle::after {
+            right: 5px;
+        }
+        /* --- AKHIR STYLING SLIDER --- */
+
+        .faq-item {
+            margin-bottom: 10px;
+        }
+        .faq-item summary {
+            font-weight: 600;
+            cursor: pointer;
+            padding: 15px;
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            transition: background-color 0.3s;
+            list-style: none;
+            position: relative;
+        }
+        .faq-item summary::marker, .faq-item summary::-webkit-details-marker {
+            display: none;
+        }
+        .faq-item summary::before {
+            content: "▶";
+            position: absolute;
+            left: 15px;
+            transition: transform 0.2s ease;
+        }
+        .faq-item[open] summary::before {
+            transform: rotate(90deg);
+        }
+        .faq-item summary p {
+            padding-left: 25px;
+        }
+        .faq-item p {
+            padding: 15px;
+            color: var(--text-dark);
+            background-color: rgba(0,0,0,0.1);
+            border-radius: 0 0 10px 10px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            color: var(--text-dark);
+        }
+
+        #uploadForm {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .custom-file-upload {
+            border: 2px dashed var(--purple-accent);
+            border-radius: 15px;
+            text-align: center;
+            padding: 40px 20px;
+            cursor: pointer;
+            width: 100%;
+            display: block;
+        }
+        .custom-file-upload span {
+            font-size: 3rem;
+            color: var(--purple-accent);
+            display: block;
+        }
+        .custom-file-upload p {
+            color: var(--text-dark);
+        }
+        #filter {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--card-bg);
+            background-color: var(--card-bg);
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+        #filter option {
+            background-color: var(--card-bg);
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            border: none;
+            background: var(--purple-accent);
+            color: var(--text-light);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button[type="submit"]:hover {
+            background: #7b1fa2;
+        }
+
+        #hasil {
+            text-align: center;
+            margin-top: 20px;
+        }
+        #hasil img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        #hasil a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: var(--pink-accent);
+            color: var(--text-light);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">ZedxWaifu</div>
+            <div class="menu-icon" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </header>
+
+        <div id="mySidebar" class="sidebar">
+            <ul class="sidebar-links">
+                <li><a href="#">Beranda</a></li>
+                <li><a href="#">Tentang Kami</a></li>
+                <li><a href="#">Tutorial</a></li>
+                <li><a href="#">Contoh</a></li>
+                <li><a href="#">FAQ</a></li>
+                <li><a href="#">Kontak</a></li>
+            </ul>
+        </div>
+        
+        <section class="hero">
+            <h1>HitamKan waifu mu</h1>
+            <p>RAMAIKAN, LALU HITAMKAN.</p>
+        </section>
+
+        <section class="card">
+            <h2>Apa Itu Web Penghitaman Waifu?</h2>
+            <p>Web Penghitaman Waifu adalah platform inovatif yang menggunakan teknologi AI untuk mengubah tampilan karakter anime (waifu) menjadi versi dengan warna kulit yang lebih gelap.</p>
+        </section>
+
+        <section class="card">
+            <h2>Tutorial</h2>
+            <div class="tutorial-item">
+                <div class="icon">
+                    <span class="step-number">1.</span>
+                </div>
+                <div>
+                    <span class="step-number">Upload Image</span>
+                    <p>Kirim Gambar Waifu mu</p>
+                </div>
+            </div>
+            <div class="tutorial-item">
+                <div class="icon">
+                    <span class="step-number">2.</span>
+                </div>
+                <div>
+                    <span class="step-number">Transform</span>
+                    <p>Klik tombol transform dan tunggu prosesnya</p>
+                </div>
+            </div>
+            <div class="tutorial-item">
+                <div class="icon">
+                    <span class="step-number">3.</span>
+                </div>
+                <div>
+                    <span class="step-number">Download</span>
+                    <p>Download hasil transformasi waifu kamu</p>
+                </div>
+            </div>
+        </section>
+        
+        <form id="uploadForm" class="card">
+            <label for="image-upload" class="custom-file-upload">
+                <span class="upload-icon">⬆</span>
+                <p>Drop your waifu here</p>
+                <p>PNG & JPG supported.</p>
+                <input type="file" id="image-upload" name="image" accept="image/png, image/jpeg" required>
+            </label>
+            <select name="filter" id="filter">
+                <option value="coklat">Coklat</option>
+                <option value="hitam" selected>Hitam</option>
+                <option value="nerd">Nerd</option>
+                <option value="piggy">Piggy</option>
+                <option value="carbon">Carbon</option>
+                <option value="botak">Botak</option>
+            </select>
+            <button type="submit">Transform</button>
+        </form>
+
+        <div id="hasil"></div>
+
+        <section class="card">
+            <h2>Contoh</h2>
+            <div class="image-compare-container">
+                <img id="image-transformed" src="https://raw.githubusercontent.com/ikyYourStar/ksr-api/refs/heads/main/ksr-image/hasil-waifu%20(4).jpg" alt="Hasil transformasi waifu" class="image-transformed">
+                <img id="image-original" src="https://raw.githubusercontent.com/ikyYourStar/ksr-api/refs/heads/main/ksr-image/eb3f36a46cf0db63940601e786349ab2.jpg" alt="Gambar waifu normal" class="image-original">
+                <div class="slider-line"></div>
+                <div class="slider-handle"></div>
+            </div>
+            <p style="text-align: center; color: var(--text-dark); margin-top: 10px;">Geser slider untuk melihat perbandingan</p>
+        </section>
+
+        <section class="card">
+            <h2>FAQ</h2>
+            <div class="faq-item">
+                <details>
+                    <summary>▶ Kenapa transformasi nya stuck di 85%?</summary>
+                    <p>Hal ini bisa terjadi karena beberapa alasan, seperti server sedang sibuk, ukuran gambar terlalu besar, atau koneksi internet tidak stabil. Coba ulangi prosesnya kembali.</p>
+                </details>
+            </div>
+            <div class="faq-item">
+                <details>
+                    <summary>▶ Apakah bisa untuk menghitamkan selain karakter anime?</summary>
+                    <p>Saat ini, platform ini dioptimalkan untuk karakter anime. Hasilnya mungkin tidak optimal untuk gambar non-anime.</p>
+                </details>
+            </div>
+            <div class="faq-item">
+                <details open>
+                    <summary>▼ Dengan apa website ini dibuat?</summary>
+                    <p>Website ini dibuat dengan menggunakan Node.js dan Express di sisi server, serta HTML, CSS, dan JavaScript murni untuk tampilan antarmuka.</p>
+                </details>
+            </div>
+        </section>
+
+        <footer class="footer-section">
+            <div class="footer-grid">
+                <div>
+                    <h3>About</h3>
+                    <p>Web Penghitaman Waifu adalah platform AI untuk mengubah tampilan karakter anime menjadi lebih hitam.</p>
+                </div>
+                <div>
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="https://zedxwaifu.vercel.app/">Home</a></li>
+                        <li><a href="">About</a></li>
+                        <li><a href="#">Tools</a></li>
+                        <li><a href="https://docs.google.com/document/d/1pdYY03KouTmWTJzyT4H4g6Yjj7iS7VtnV4kVaUr4UuM/edit?usp=drivesdk">FAQ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Connect</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">GitHub</a></li>
+                        <li><a href="#">Support Project</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="credits">
+                <p>&copy; 2025 ZedxWaifu. All rights reserved.</p>
+                <p>Created by <a href=https://wa.me/6282116501477?text=Halo%20bang>Rizky</a></p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const exampleImages = {
+            'coklat': {
+                original: 'https://raw.githubusercontent.com/ikyYourStar/ksr-api/refs/heads/main/ksr-image/af38bbe7e45fb538e5390f827cfa2224.jpg',
+                transformed: 'https://raw.githubusercontent.com/ikyYourStar/ksr-api/refs/heads/main/ksr-image/hasil-waifu%20(5).jpg'
+            },
+            'hitam': {
+                original: 'https://raw.githubusercontent.com/ikyYourStar/ksr-api/refs/heads/main/ksr-image/eb3f36a46cf0db63940601e786349ab2.jpg',
+                transformed: 'https://raw.githubusercontent.com/ikyYourStar/ksr-api/refs/heads/main/ksr-image/hasil-waifu%20(4).jpg'
+            },
+            'nerd': {
+                original: 'https://raw.githubusercontent.com/ikyYourStar/ksr-api/refs/heads/main/ksr-image/images%20(2).jpeg',
+                transformed: 'https://raw.githubusercontent.com/ikyYourStar/ksr-api/refs/heads/main/ksr-image/hasil-waifu%20(6).jpg'
+            },
+            'piggy': {
+                original: 'https://raw.githubusercontent.com/ikyYourStar/ksr-api/refs/heads/main/ksr-image/be3dcd8cb340a723f8c76195df19ce3b.jpg',
+                transformed: 'https://raw.githubusercontent.com/ikyYourStar/ksr-api/refs/heads/main/ksr-image/hasil-waifu%20(7).jpg'
+            },
+            'carbon': {
+                original: 'https://raw.githubusercontent.com/ikyYourStar/ksr-api/refs/heads/main/ksr-image/hasil_hd.jpg',
+                transformed: 'https://raw.githubusercontent.com/ikyYourStar/ksr-api/refs/heads/main/ksr-image/hasil-waifu%20(8).jpg'
+            },
+            'botak': {
+                original: 'https://via.placeholder.com/600x600.png?text=Normal+Botak',
+                transformed: 'https://via.placeholder.com/600x600.png?text=Hasil+Botak'
+            }
+        };
+
+        const filterSelect = document.getElementById('filter');
+        const originalImage = document.getElementById('image-original');
+        const transformedImage = document.getElementById('image-transformed');
+        const imageCompareContainer = document.querySelector('.image-compare-container');
+        const sliderLine = document.querySelector('.slider-line');
+        const sliderHandle = document.querySelector('.slider-handle');
+
+        let isDragging = false;
+
+        const updateSlider = (position) => {
+            const containerWidth = imageCompareContainer.offsetWidth;
+            const percentage = (position / containerWidth) * 100;
+            
+            const clampedPercentage = Math.max(0, Math.min(100, percentage));
+            
+            originalImage.style.clipPath = `inset(0 ${100 - clampedPercentage}% 0 0)`;
+            sliderLine.style.left = `${clampedPercentage}%`;
+            sliderHandle.style.left = `${clampedPercentage}%`;
+        };
+        
+        sliderHandle.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            sliderHandle.style.cursor = 'grabbing';
+            e.preventDefault();
+        });
+        
+        sliderHandle.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            e.preventDefault();
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            sliderHandle.style.cursor = 'grab';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const containerRect = imageCompareContainer.getBoundingClientRect();
+            let position = e.clientX - containerRect.left;
+            updateSlider(position);
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const touch = e.touches[0];
+            const containerRect = imageCompareContainer.getBoundingClientRect();
+            let position = touch.clientX - containerRect.left;
+            updateSlider(position);
+        });
+
+        document.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
+        const initSlider = () => {
+            updateSlider(imageCompareContainer.offsetWidth / 2);
+        };
+        
+        initSlider();
+        window.addEventListener('resize', initSlider);
+        
+        const updateExampleImages = (filter) => {
+            const urls = exampleImages[filter];
+            originalImage.src = urls.original;
+            transformedImage.src = urls.transformed;
+            initSlider();
+        };
+
+        filterSelect.addEventListener('change', (e) => {
+            const selectedFilter = e.target.value;
+            updateExampleImages(selectedFilter);
+        });
+
+        document.getElementById("uploadForm").onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const filter = document.getElementById("filter").value;
+            
+            document.getElementById("hasil").innerHTML = "<p>Sedang memproses...</p>";
+
+            try {
+                const res = await fetch(`/process?filter=${filter}`, { method: "POST", body: formData });
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.error);
+                }
+                const data = await res.json();
+                document.getElementById("hasil").innerHTML = `
+                    <h3>Hasil:</h3>
+                    <img src="${data.image}" alt="Hasil transformasi"><br>
+                    <a href="${data.image}" download="hasil-waifu.jpg">Unduh Gambar</a>
+                `;
+            } catch (error) {
+                document.getElementById("hasil").innerHTML = `<p style="color: var(--pink-accent);">${error.message}</p>`;
+            }
+        };
+
+        const fileInput = document.getElementById('image-upload');
+        const fileLabel = document.querySelector('.custom-file-upload p');
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                fileLabel.textContent = fileInput.files[0].name;
+            } else {
+                fileLabel.textContent = "Drop your waifu here";
+            }
+        });
+
+        // FUNGSI BARU UNTUK SIDEBAR
+        function toggleSidebar() {
+            const sidebar = document.getElementById("mySidebar");
+            const menuIcon = document.querySelector(".menu-icon");
+            if (sidebar.style.width === "250px") {
+                sidebar.style.width = "0";
+                menuIcon.classList.remove("open");
+            } else {
+                sidebar.style.width = "250px";
+                menuIcon.classList.add("open");
+            }
+        }
+    </script>
+</body>
+</html>
