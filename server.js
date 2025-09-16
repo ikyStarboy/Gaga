@@ -2,7 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const axios = require("axios");
 const FormData = require("form-data");
-const { fileTypeFromBuffer } = require("file-type");
+const fileType = require("file-type"); // Ubah baris ini
 const fs = require("fs");
 
 const app = express();
@@ -13,7 +13,6 @@ app.use(express.static("public"));
 
 const validFilters = ["coklat", "hitam", "nerd", "piggy", "carbon", "botak"];
 
-// Ganti dengan API key ImgBB Anda
 const IMGBB_API_KEY = "a12e3657b8edd041c13eda8c12ff5925";
 
 app.post("/process", upload.single("image"), async (req, res) => {
@@ -24,12 +23,12 @@ app.post("/process", upload.single("image"), async (req, res) => {
     try {
         const fileBuffer = req.file.buffer;
 
-        const type = await fileTypeFromBuffer(fileBuffer);
+        // Gunakan fileType.fileTypeFromBuffer
+        const type = await fileType.fileTypeFromBuffer(fileBuffer); 
         if (!type) {
             return res.status(400).json({ error: "File tidak valid!" });
         }
 
-        // Upload ke Ryzen CDN
         const form = new FormData();
         form.append("file", fileBuffer, {
             filename: `upload.${type.ext}`,
@@ -55,7 +54,6 @@ app.post("/process", upload.single("image"), async (req, res) => {
                 .json({ error: `Filter tidak valid. Pilihan: ${validFilters.join(", ")}` });
         }
 
-        // Request ke API recolor Ryzen dan dapatkan hasilnya sebagai buffer
         const aiRes = await axios.get(
             "https://api.ryzumi.vip/api/ai/negro",
             {
@@ -64,7 +62,6 @@ app.post("/process", upload.single("image"), async (req, res) => {
             }
         );
 
-        // Langsung unggah buffer hasil ke ImgBB
         const imgbbForm = new FormData();
         imgbbForm.append("image", aiRes.data.toString("base64"));
 
@@ -75,10 +72,8 @@ app.post("/process", upload.single("image"), async (req, res) => {
         );
 
         if (imgbbRes.data.success) {
-            // Jika berhasil, kirim URL ImgBB sebagai respons
             res.json({ image: imgbbRes.data.data.url });
         } else {
-            // Jika gagal, kirim pesan error dari ImgBB
             res.status(500).json({ error: "Gagal mengunggah ke ImgBB." });
         }
     } catch (err) {
